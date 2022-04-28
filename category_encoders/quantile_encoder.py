@@ -2,6 +2,9 @@
 __author__ = "david26694", "cmougan"
 
 import numpy as np
+from sklearn.exceptions import NotFittedError
+from sklearn.utils.validation import _check_feature_names_in
+
 from category_encoders.ordinal import OrdinalEncoder
 from sklearn.base import BaseEstimator
 import category_encoders.utils as util
@@ -432,20 +435,22 @@ class SummaryEncoder(BaseEstimator, util.TransformerWithTargetMixin):
         else:
             return transformed_df.values
 
-    def get_feature_names(self):
+    def get_feature_names_out(self, input_features=None):
         """
         Returns the names of all transformed / added columns.
+
         Returns
         -------
-        feature_names: list
-            A list with all feature names transformed or added.
+        feature_names: array
+            A array with all feature names transformed or added.
             Note: potentially dropped features are not included!
-        """
 
+        """
         if not isinstance(self.feature_names, list):
-            raise ValueError("Must fit data first. Affected feature names are not known before.")
+            raise NotFittedError
         else:
-            return self.feature_names
+            input_features = _check_feature_names_in(self, input_features)
+            return np.asarray(input_features, dtype=object)
 
     @staticmethod
     def _get_col_name(col: str, quantile: float) -> str:

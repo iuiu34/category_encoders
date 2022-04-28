@@ -1,7 +1,8 @@
 """Binary encoding"""
-
+import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.exceptions import NotFittedError
 
 import category_encoders as ce
 
@@ -140,16 +141,19 @@ class BinaryEncoder(BaseEstimator, TransformerMixin):
 
         return self.base_n_encoder.inverse_transform(X_in)
 
-    def get_feature_names(self):
+    def get_feature_names_out(self, input_features=None):
         """
         Returns the names of all transformed / added columns.
 
         Returns
         -------
-        feature_names: list
-            A list with all feature names transformed or added.
+        feature_names: array
+            A array with all feature names transformed or added.
             Note: potentially dropped features are not included!
 
         """
-
-        return self.base_n_encoder.get_feature_names()
+        if not isinstance(self.feature_names, list):
+            raise NotFittedError
+        else:
+            input_features = self.base_n_encoder.get_feature_names_out(input_features)
+            return np.asarray(input_features, dtype=object)
